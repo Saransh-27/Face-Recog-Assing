@@ -2,6 +2,65 @@
 
 A Spring Boot backend that accepts video uploads, processes them into frames, performs face detection (mock/simulated), generates ROI (Region of Interest) bounding boxes, draws rectangles using Java Graphics2D, and stores everything in MongoDB Atlas.
 
+## 🚀 How to Start the Project
+
+### Prerequisites
+- Java 17+
+- Maven 3.8+
+- MongoDB Atlas account (free tier works)
+- Docker (optional)
+
+#### 1. Configure MongoDB Atlas
+
+1. Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/atlas)
+2. Create a database user
+3. Whitelist your IP (or `0.0.0.0/0` for development)
+4. Get your connection string
+
+**🔥 OR message me at [saranshdhiman353@gmail.com](mailto:saranshdhiman353@gmail.com) and I'll send you a ready-to-use URI!**
+
+#### 2. Set Environment Variables
+
+```bash
+
+# Edit .env with your actual values:
+MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/facedb?retryWrites=true&w=majority
+UPLOAD_DIR=uploads
+```
+
+#### 3. Run Locally (Maven)
+
+```bash
+# Set the environment variable
+export MONGODB_URI="mongodb+srv://username:password@cluster.mongodb.net/facedb?retryWrites=true&w=majority"
+
+# Build and run
+./mvnw spring-boot:run
+```
+
+#### 4. Run with Docker
+
+```bash
+# Set your MongoDB URI in .env file, then:
+docker-compose up --build
+```
+
+#### 5. Open the Frontend
+
+Navigate to `http://localhost:8080` to use the web UI.
+
+## 📸 Application Screenshots
+
+Here is the Docker container architecture:
+![architecture_diagram.png](architecture_diagram.png)
+
+And here are the different crops of this project to help you see better:
+![Crop 1](screenshots/Screenshot%202026-05-06%20171610.png)
+![Crop 2](screenshots/Screenshot%202026-05-06%20171626.png)
+![Crop 3](screenshots/Screenshot%202026-05-06%20171645.png)
+
+
+## 
 ## 🏗️ Architecture
 
 ```
@@ -127,67 +186,6 @@ db.rois.createIndex({ "videoId": 1 })
 | **JSON-Native** | REST APIs return JSON; MongoDB stores BSON — minimal serialization overhead |
 | **Cloud-Ready** | MongoDB Atlas eliminates DB ops — ideal for containerized deployments |
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Java 17+
-- Maven 3.8+
-- MongoDB Atlas account (free tier works)
-- Docker (optional)
-
-### Quick Start for Other Developers
-
-```bash
-# 1. Clone the repository
-git clone <your-repository-url>
-cd face
-
-# 2. Set up environment variables
-cp .env.example .env
-# Edit .env with your MongoDB Atlas URI
-
-# 3. Run the application
-./mvnw spring-boot:run
-```
-
-### Detailed Setup
-
-#### 1. Configure MongoDB Atlas
-
-1. Create a free cluster at [MongoDB Atlas](https://www.mongodb.com/atlas)
-2. Create a database user
-3. Whitelist your IP (or `0.0.0.0/0` for development)
-4. Get your connection string
-
-#### 2. Set Environment Variables
-
-```bash
-
-# Edit .env with your actual values:
-MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/facedb?retryWrites=true&w=majority
-UPLOAD_DIR=uploads
-```
-
-### 3. Run Locally (Maven)
-
-```bash
-# Set the environment variable
-export MONGODB_URI="mongodb+srv://username:password@cluster.mongodb.net/facedb?retryWrites=true&w=majority"
-
-# Build and run
-./mvnw spring-boot:run
-```
-
-### 4. Run with Docker
-
-```bash
-# Set your MongoDB URI in .env file, then:
-docker-compose up --build
-```
-
-### 5. Open the Frontend
-
-Navigate to `http://localhost:8080` to use the web UI.
 
 ## 📁 Project Structure
 
