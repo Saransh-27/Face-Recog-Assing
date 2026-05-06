@@ -2,6 +2,17 @@
 
 A Spring Boot backend that accepts video uploads, processes them into frames, performs face detection (mock/simulated), generates ROI (Region of Interest) bounding boxes, draws rectangles using Java Graphics2D, and stores everything in MongoDB Atlas.
 
+> ## **📌 Important Note**
+>
+> This assignment was specified for a Python stack, but it has been implemented using Java (Spring Boot) due to my familiarity with the stack.
+>
+> I had reached out for confirmation but did not receive a response, so I proceeded to avoid delays. The solution fulfills all required functionality.
+>
+> I'm open to adapting it to a Python stack if needed.
+
+---
+
+
 ## 🚀 How to Start the Project
 
 ### Prerequisites
