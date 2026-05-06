@@ -9,6 +9,15 @@ A Spring Boot backend that accepts video uploads, processes them into frames, pe
 > I had reached out for confirmation but did not receive a response, so I proceeded to avoid delays. The solution fulfills all required functionality.
 >
 > I'm open to adapting it to a Python stack if needed.
+>
+> ---
+>
+> **📄 Assignment Report**
+>
+> A detailed assignment report is attached as `REPORT.md` in the project root, containing:
+> - Project approach and methodology
+> - Technology choice justification
+> - AI usage attestation and documentation
 
 ---
 
