@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: face-detection-api
+
+  # MongoDB Atlas Configuration
+  # Set MONGODB_URI as environment variable with your Atlas connection string
+  # Example: mongodb+srv://username:password@cluster.mongodb.net/facedb?retryWrites=true&w=majority
+  data:
+    mongodb:
+      uri: ${MONGODB_URI}
+
+  # File upload size limits (max 100MB video files)
+  servlet:
+    multipart:
+      max-file-size: 100MB
+      max-request-size: 100MB
+
+server:
+  port: 8080
+
+# Application-specific settings
+app:
+  upload:
+    # Directory to store uploaded videos and processed frames
+    dir: ${UPLOAD_DIR:uploads}

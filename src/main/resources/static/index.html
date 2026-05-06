@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Detection - Video Processor</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e0e0e0;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 30px;
+            background: linear-gradient(to right, #00f260, #0575e6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .card {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .card h2 { color: #00f260; margin-bottom: 15px; font-size: 1.2rem; }
+        .upload-area {
+            border: 2px dashed rgba(0,242,96,0.3);
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover { border-color: #00f260; background: rgba(0,242,96,0.05); }
+        .upload-area input[type="file"] { display: none; }
+        .upload-area label { cursor: pointer; font-size: 1.1rem; }
+        .btn {
+            background: linear-gradient(to right, #00f260, #0575e6);
+            color: #fff;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 6px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: transform 0.2s, opacity 0.2s;
+        }
+        .btn:hover { transform: translateY(-2px); opacity: 0.9; }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+        }
+        .status.success { display: block; background: rgba(0,242,96,0.1); border: 1px solid rgba(0,242,96,0.3); }
+        .status.error { display: block; background: rgba(255,71,87,0.1); border: 1px solid rgba(255,71,87,0.3); color: #ff4757; }
+        .status.loading { display: block; background: rgba(5,117,230,0.1); border: 1px solid rgba(5,117,230,0.3); color: #0575e6; }
+        .frames-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .frame-card {
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+            transition: transform 0.2s;
+        }
+        .frame-card:hover { transform: scale(1.02); }
+        .frame-card img { width: 100%; display: block; }
+        .frame-card .info { padding: 8px 12px; font-size: 0.85rem; color: #aaa; }
+        .roi-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .roi-table th, .roi-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .roi-table th { color: #00f260; font-weight: 600; }
+        .roi-table tr:hover { background: rgba(255,255,255,0.03); }
+        .lookup { display: flex; gap: 10px; align-items: center; }
+        .lookup input {
+            flex: 1;
+            padding: 10px 15px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.05);
+            color: #e0e0e0;
+            font-size: 1rem;
+        }
+        .lookup input:focus { outline: none; border-color: #00f260; }
+        #fileName { margin-top: 10px; color: #aaa; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎬 Face Detection Video Processor</h1>
+
+        <!-- Upload Section -->
+        <div class="card">
+            <h2>📤 Upload Video</h2>
+            <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                <label for="fileInput">Click to select a video file or drag & drop</label>
+                <input type="file" id="fileInput" accept="video/*" onchange="onFileSelect(this)">
+                <div id="fileName"></div>
+            </div>
+            <button class="btn" id="uploadBtn" onclick="uploadVideo()" disabled>Upload & Process</button>
+            <div class="status" id="uploadStatus"></div>
+        </div>
+
+        <!-- Lookup Section -->
+        <div class="card">
+            <h2>🔍 Lookup Video by ID</h2>
+            <div class="lookup">
+                <input type="text" id="videoIdInput" placeholder="Enter Video ID...">
+                <button class="btn" onclick="lookupVideo()">Fetch</button>
+            </div>
+        </div>
+
+        <!-- Video Details -->
+        <div class="card" id="videoDetails" style="display:none">
+            <h2>📋 Video Details</h2>
+            <div id="videoInfo"></div>
+        </div>
+
+        <!-- Processed Frames -->
+        <div class="card" id="framesSection" style="display:none">
+            <h2>🖼️ Processed Frames (with Bounding Boxes)</h2>
+            <div class="frames-grid" id="framesGrid"></div>
+        </div>
+
+        <!-- ROI Data -->
+        <div class="card" id="roiSection" style="display:none">
+            <h2>📊 ROI Data (Face Detections)</h2>
+            <table class="roi-table">
+                <thead>
+                    <tr><th>Frame</th><th>X</th><th>Y</th><th>Width</th><th>Height</th><th>Confidence</th></tr>
+                </thead>
+                <tbody id="roiTableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        const API = '/api/video';
+        let selectedFile = null;
+
+        function onFileSelect(input) {
+            selectedFile = input.files[0];
+            document.getElementById('fileName').textContent = selectedFile ? `Selected: ${selectedFile.name}` : '';
+            document.getElementById('uploadBtn').disabled = !selectedFile;
+        }
+
+        async function uploadVideo() {
+            if (!selectedFile) return;
+            const status = document.getElementById('uploadStatus');
+            const btn = document.getElementById('uploadBtn');
+            
+            status.className = 'status loading';
+            status.textContent = '⏳ Uploading and processing... This may take a moment.';
+            btn.disabled = true;
+
+            try {
+                const formData = new FormData();
+                formData.append('file', selectedFile);
+                const res = await fetch(`${API}/upload`, { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if (res.ok) {
+                    status.className = 'status success';
+                    status.textContent = `✅ Success! Video ID: ${data.video.id} — ${data.framesProcessed} frames processed`;
+                    document.getElementById('videoIdInput').value = data.video.id;
+                    displayVideoData(data.video);
+                    fetchROIs(data.video.id);
+                } else {
+                    status.className = 'status error';
+                    status.textContent = `❌ Error: ${data.message || data.error}`;
+                }
+            } catch (err) {
+                status.className = 'status error';
+                status.textContent = `❌ Network error: ${err.message}`;
+            }
+            btn.disabled = false;
+        }
+
+        async function lookupVideo() {
+            const id = document.getElementById('videoIdInput').value.trim();
+            if (!id) return;
+            try {
+                const res = await fetch(`${API}/${id}`);
+                if (res.ok) {
+                    const video = await res.json();
+                    displayVideoData(video);
+                    fetchROIs(id);
+                } else {
+                    alert('Video not found');
+                }
+            } catch (err) { alert('Error: ' + err.message); }
+        }
+
+        function displayVideoData(video) {
+            document.getElementById('videoDetails').style.display = 'block';
+            document.getElementById('videoInfo').innerHTML = `
+                <p><strong>ID:</strong> ${video.id}</p>
+                <p><strong>File:</strong> ${video.originalFileName}</p>
+                <p><strong>Status:</strong> ${video.status}</p>
+                <p><strong>Frames:</strong> ${video.frameCount}</p>
+                <p><strong>Size:</strong> ${(video.fileSize / 1024 / 1024).toFixed(2)} MB</p>
+                <p><strong>Uploaded:</strong> ${video.uploadedAt}</p>
+                <p><strong>Processed:</strong> ${video.processedAt || 'N/A'}</p>
+            `;
+
+            // Display frames
+            if (video.frameCount > 0) {
+                document.getElementById('framesSection').style.display = 'block';
+                const grid = document.getElementById('framesGrid');
+                grid.innerHTML = '';
+                for (let i = 0; i < video.frameCount; i++) {
+                    grid.innerHTML += `
+                        <div class="frame-card">
+                            <img src="${API}/${video.id}/frames/${i}" alt="Frame ${i}" loading="lazy">
+                            <div class="info">Frame #${i}</div>
+                        </div>`;
+                }
+            }
+        }
+
+        async function fetchROIs(videoId) {
+            try {
+                const res = await fetch(`${API}/${videoId}/roi`);
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('roiSection').style.display = 'block';
+                    const tbody = document.getElementById('roiTableBody');
+                    tbody.innerHTML = data.rois.map(r => `
+                        <tr>
+                            <td>${r.frameNumber}</td><td>${r.x}</td><td>${r.y}</td>
+                            <td>${r.width}</td><td>${r.height}</td>
+                            <td>${(r.confidence * 100).toFixed(0)}%</td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (err) { console.error('Error fetching ROIs:', err); }
+        }
+    </script>
+</body>
+</html>

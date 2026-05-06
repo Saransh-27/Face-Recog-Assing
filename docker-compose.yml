@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  # Spring Boot Backend
+  # MongoDB is hosted on MongoDB Atlas (cloud), so no local MongoDB container needed
+  face-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: face-detection-api
+    ports:
+      - "8080:8080"
+    environment:
+      # IMPORTANT: Set your MongoDB Atlas connection string here
+      # Get it from: MongoDB Atlas → Connect → Drivers → Java
+      - MONGODB_URI=${MONGODB_URI:-mongodb+srv://username:password@cluster.mongodb.net/facedb?retryWrites=true&w=majority}
+      - UPLOAD_DIR=/app/uploads
+    volumes:
+      # Persist uploaded videos and processed frames
+      - face-uploads:/app/uploads
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/api/video/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  face-uploads:
+    driver: local
