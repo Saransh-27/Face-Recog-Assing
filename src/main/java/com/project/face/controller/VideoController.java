@@ -59,14 +59,10 @@ public class VideoController {
     @PostMapping("/upload")
     public ResponseEntity<?> uploadVideo(@RequestParam("file") MultipartFile file) {
         log.info("Received video upload: {} ({} bytes)", file.getOriginalFilename(), file.getSize());
-
-        // Validate the uploaded file
         if (file.isEmpty()) {
             return ResponseEntity.badRequest()
                     .body(Map.of("error", "No file provided", "message", "Please upload a video file"));
         }
-
-        // Basic content type validation
         String contentType = file.getContentType();
         if (contentType == null || !contentType.startsWith("video/")) {
             log.warn("Invalid file type uploaded: {}", contentType);
@@ -79,13 +75,10 @@ public class VideoController {
             Video video = videoService.uploadVideo(file);
             log.info("Video upload and processing complete. ID: {}, Status: {}",
                     video.getId(), video.getStatus());
-
-            // Build response with video details and summary
             Map<String, Object> response = new HashMap<>();
             response.put("video", video);
             response.put("message", "Video uploaded and processed successfully");
             response.put("framesProcessed", video.getFrameCount());
-
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
 
         } catch (IOException e) {
@@ -106,15 +99,12 @@ public class VideoController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getVideo(@PathVariable String id) {
         log.info("Fetching video details for ID: {}", id);
-
         Optional<Video> video = videoService.getVideoById(id);
-
         if (video.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Video not found",
                             "message", "No video found with ID: " + id));
         }
-
         return ResponseEntity.ok(video.get());
     }
 
@@ -130,24 +120,18 @@ public class VideoController {
     @GetMapping("/{id}/roi")
     public ResponseEntity<?> getROIs(@PathVariable String id) {
         log.info("Fetching ROI data for video ID: {}", id);
-
-        // First verify the video exists
         Optional<Video> video = videoService.getVideoById(id);
         if (video.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body(Map.of("error", "Video not found",
                             "message", "No video found with ID: " + id));
         }
-
         List<ROI> rois = videoService.getROIsByVideoId(id);
-
-        // Build a structured response
         Map<String, Object> response = new HashMap<>();
         response.put("videoId", id);
         response.put("totalFrames", video.get().getFrameCount());
         response.put("totalDetections", rois.size());
         response.put("rois", rois);
-
         return ResponseEntity.ok(response);
     }
 
@@ -165,27 +149,19 @@ public class VideoController {
     public ResponseEntity<Resource> getFrame(@PathVariable String id,
             @PathVariable int frameNumber) {
         log.info("Fetching frame {} for video ID: {}", frameNumber, id);
-
         Optional<Video> videoOpt = videoService.getVideoById(id);
         if (videoOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
-
         Video video = videoOpt.get();
-
-        // Validate frame number
         if (frameNumber < 0 || frameNumber >= video.getFrameCount()) {
             return ResponseEntity.badRequest().build();
         }
-
-        // Get the frame file path
         String framePath = video.getProcessedFramePaths().get(frameNumber);
         File frameFile = new File(framePath);
-
         if (!frameFile.exists()) {
             return ResponseEntity.notFound().build();
         }
-
         Resource resource = new FileSystemResource(frameFile);
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)

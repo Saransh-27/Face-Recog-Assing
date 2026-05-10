@@ -37,34 +37,14 @@ public class Video {
 
     @Id
     private String id;
-
-    /** Original file name from the upload */
     private String fileName;
-
-    /** Original file name preserved for display */
     private String originalFileName;
-
-    /** Server-side path where the video file is stored */
     private String filePath;
-
-    /** MIME type of the uploaded file (e.g., video/mp4) */
     private String contentType;
-
-    /** File size in bytes */
     private long fileSize;
-
-    /** Processing status: UPLOADED, PROCESSING, PROCESSED, FAILED */
     private String status;
-
-    /** Number of frames extracted from the video */
     private int frameCount;
-
-    /** Paths to processed frames with bounding boxes drawn */
     private List<String> processedFramePaths;
-
-    /** Timestamp when the video was uploaded */
     private LocalDateTime uploadedAt;
-
-    /** Timestamp when processing completed */
     private LocalDateTime processedAt;
 }

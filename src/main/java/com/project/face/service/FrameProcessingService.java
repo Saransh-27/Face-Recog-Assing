@@ -37,11 +37,7 @@ import java.util.Random;
 public class FrameProcessingService {
 
     private final ROIRepository roiRepository;
-
-    // Number of simulated frames to extract per video
     private static final int SIMULATED_FRAME_COUNT = 10;
-
-    // Simulated frame dimensions (standard 720p)
     private static final int FRAME_WIDTH = 1280;
     private static final int FRAME_HEIGHT = 720;
 
@@ -62,8 +58,7 @@ public class FrameProcessingService {
         log.info("Processing video: {} (ID: {})", videoPath, videoId);
 
         List<String> processedFramePaths = new ArrayList<>();
-        Random random = new Random(videoId.hashCode()); // Deterministic for same video
-
+        Random random = new Random(videoId.hashCode());
         for (int frameNum = 0; frameNum < SIMULATED_FRAME_COUNT; frameNum++) {
             // Step 1: Generate a simulated frame (in production, this would extract from
             // video)

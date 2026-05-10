@@ -10,7 +10,4 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface VideoRepository extends MongoRepository<Video, String> {
-    // Spring Data MongoDB provides all basic CRUD methods:
-    // save(), findById(), findAll(), deleteById(), etc.
-    // No custom queries needed for this simple use case.
 }

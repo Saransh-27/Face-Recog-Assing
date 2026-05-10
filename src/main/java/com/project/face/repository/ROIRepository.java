@@ -5,14 +5,6 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
-
-/**
- * Repository interface for ROI (Region of Interest) documents.
- * 
- * The findByVideoId method leverages the @Indexed annotation on ROI.videoId
- * for efficient queries. MongoDB will use the index:
- * db.rois.createIndex({ "videoId": 1 })
- */
 @Repository
 public interface ROIRepository extends MongoRepository<ROI, String> {
 
